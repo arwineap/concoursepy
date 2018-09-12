@@ -21,7 +21,7 @@ class api:
         return self.get("%s/api/v1/builds/%s" % build_id)
 
     def versions(self, pipeline_name, resource_name, limit=100):
-        return self.get("%s/api/v1/teams/%s/pipelines/%s/resources/%s/versions?limit=%s" % (self.url, self.team, pipeline_name, limit))
+        return self.get("%s/api/v1/teams/%s/pipelines/%s/resources/%s/versions?limit=%s" % (self.url, self.team, pipeline_name, resource_name, limit))
 
     def input_to(self, pipeline_name, resource_name, resource_id):
         return self.get("%s/api/v1/teams/%s/pipelines/%s/resources/%s/versions/%s/input_to" % (self.url, self.team, pipeline_name, resource_name, resource_id))
@@ -33,22 +33,25 @@ class api:
         return self.post("%s/api/v1/teams/%s/pipelines/%s/jobs/%s/builds" % (self.url, self.team, pipeline_name, job_name))
 
     def enable(self, pipeline_name, resource_name, job_name):
-        return put("%s/api/v1/teams/%s/pipelines/%s/resources/%s/versions/%s/enable" % (self.url, self.team, pipeline_name, resource_name, job_name))
+        return self.put("%s/api/v1/teams/%s/pipelines/%s/resources/%s/versions/%s/enable" % (self.url, self.team, pipeline_name, resource_name, job_name))
 
     def disable(self, pipeline_name, resource_name, job_name):
-        return put("%s/api/v1/teams/%s/pipelines/%s/resources/%s/versions/%s/disable" % (self.url, self.team, pipeline_name, resource_name, job_name))
+        return self.put("%s/api/v1/teams/%s/pipelines/%s/resources/%s/versions/%s/disable" % (self.url, self.team, pipeline_name, resource_name, job_name))
 
     def pause_job(self, pipeline_name, job_name):
-        return put("%s/api/v1/teams/%s/pipelines/%s/jobs/%s/pause" % (self.url, self.team, pipeline_name, job_name))
+        return self.put("%s/api/v1/teams/%s/pipelines/%s/jobs/%s/pause" % (self.url, self.team, pipeline_name, job_name))
 
     def unpause_job(self, pipeline_name, job_name):
-        return put("%s/api/v1/teams/%s/pipelines/%s/jobs/%s/unpause" % (self.url, self.team, pipeline_name, job_name))
+        return self.put("%s/api/v1/teams/%s/pipelines/%s/jobs/%s/unpause" % (self.url, self.team, pipeline_name, job_name))
 
     def pause_resource(self, pipeline_name, resource_name):
-        return put("%s/api/v1/teams/%s/pipelines/%s/resources/%s/pause" % (self.url, self.team, pipeline_name, resource_name))
+        return self.put("%s/api/v1/teams/%s/pipelines/%s/resources/%s/pause" % (self.url, self.team, pipeline_name, resource_name))
 
     def unpause_resource(self, pipeline_name, resource_name):
-        return put("%s/api/v1/teams/%s/pipelines/%s/resources/%s/unpause" % (self.url, self.team, pipeline_name, resource_name))
+        return self.put("%s/api/v1/teams/%s/pipelines/%s/resources/%s/unpause" % (self.url, self.team, pipeline_name, resource_name))
+
+    def get_pipeline(self, pipeline_name):
+        return self.get("%s/api/v1/teams/%s/pipelines/%s" % (self.url, self.team, pipeline_name))
 
     def auth(self):
         r = requests.get("%s/auth/basic/token?team_name=%s" % (self.url, self.team), auth=(self.username, self.password), headers = {'Content-Type': 'application/json'})
