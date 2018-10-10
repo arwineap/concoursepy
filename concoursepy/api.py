@@ -129,9 +129,15 @@ class api:
         return self.get("%s/api/v1/pipelines/%s/jobs/%s/badge" % (self.url, pipeline_name, job_name))
 
     def auth(self):
-        r = requests.get("%s/auth/basic/token?team_name=%s" % (self.url, self.team), auth=(self.username, self.password), headers={'Content-Type': 'application/json'})
-        if r.status_code == requests.codes.ok:
-            self.ATC_AUTH = json.loads(r.text)['value']
+        self.ATC_AUTH = None
+        session = requests.Session()
+        r = session.get("%s/sky/login" % self.url)
+        if r.status_code == 200:
+            post_url = list(filter(lambda x: '/sky/issuer/auth/local' in x, r.text.split("\n")))[0].strip().split('"')[1]
+            r = session.post("%s%s" % (self.url, post_url), data={'login': self.username, 'password': self.password})
+            if r.status_code == requests.codes.ok:
+                self.ATC_AUTH = session.cookies.get_dict()['skymarshal_auth'].split('"')[1].split()[1]
+        if self.ATC_AUTH:
             return True
         return False
 

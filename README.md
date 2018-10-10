@@ -2,8 +2,10 @@
 concoursepy gives you a way to interact with the concourse api through python
 
 currently supports
- * concourse's basic auth mechanism
+ * concourse's local user mechanism
  * the endpoints used by the concourse web ui
+
+Use a version prior to 0.0.8 for concourse 3.x
 
 ## Examples
 ```python3
