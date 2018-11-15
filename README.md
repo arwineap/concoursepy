@@ -11,6 +11,6 @@ Use a version prior to 0.0.8 for concourse 3.x
 ```python3
 import concoursepy
 
-ci = concoursepy.api('https://ci.example.com', 'team_a', 'username', 'password')
+ci = concoursepy.api('https://ci.example.com', 'username', 'password')
 print(ci.jobs('example_pipeline'))
 ```
