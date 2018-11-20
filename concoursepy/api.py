@@ -10,6 +10,9 @@ class api:
         self.ATC_AUTH = ""
         self.auth()
 
+    def get_config(self, team_name, pipeline_name):
+        return self.get("%s/api/v1/teams/%s/pipelines/%s/config" % (self.url, team_name, pipeline_name))
+
     def jobs(self, team_name, pipeline_name):
         return self.get("%s/api/v1/teams/%s/pipelines/%s/jobs" % (self.url, team_name, pipeline_name))
 
@@ -121,9 +124,9 @@ class api:
     def list_resource_versions(self, team_name, pipeline_name, resource_name, limit=100):
         return self.get("%s/api/v1/teams/%s/pipelines/%s/resources/%s/versions?limit=%s" % (self.url, team_name, pipeline_name, resource_name, limit))
 
-    def versions(self, pipeline_name, resource_name, limit=100):
+    def versions(self, team_name, pipeline_name, resource_name, limit=100):
         """Leaving this here for backwards compatibility."""
-        return self.list_resource_versions(pipeline_name, resource_name, limit)
+        return self.list_resource_versions(team_name, pipeline_name, resource_name, limit)
 
     def get_resource_version(self, team_name, pipeline_name, resource_name, resource_version_id):
         return self.get("%s/api/v1/teams/%s/pipelines/%s/resources/%s/versions/%s" % (self.url, team_name, pipeline_name, resource_name, resource_version_id))

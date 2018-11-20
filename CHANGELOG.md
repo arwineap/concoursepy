@@ -1,3 +1,6 @@
+#### 0.0.10
+fix issue where version was not passing team into list_resource_versions
+
 #### * 0.0.9
 <details>
 <summary>Moved team configuration into each method instead of as a global setting (**breaking change**)</summary>
