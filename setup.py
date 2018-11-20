@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="concoursepy",
-    version="0.0.9",
+    version="0.0.10",
     author="Alex Arwine",
     author_email="arwineap@gmail.com",
     description="library to interface with concourse",
