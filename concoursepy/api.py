@@ -179,6 +179,8 @@ class api:
         if r.status_code == 200:
             post_url = list(filter(lambda x: '/sky/issuer/auth/local' in x, r.text.split("\n")))[0].strip().split('"')[1]
             r = session.post("%s%s" % (self.url, post_url), data={'login': self.username, 'password': self.password})
+            if "invalid username and password" in r.text:
+                raise(ValueError("authentication failure"))
             if r.status_code == requests.codes.ok:
                 self.ATC_AUTH = session.cookies.get_dict()['skymarshal_auth'].split('"')[1].split()[1]
         if self.ATC_AUTH:

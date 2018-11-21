@@ -1,5 +1,9 @@
+#### 0.0.11 (unreleased)
+add messaging for when auth fails
+
 #### 0.0.10
 fix issue where version was not passing team into list_resource_versions
+add get_config which will pull the pipeline config
 
 #### * 0.0.9
 <details>
