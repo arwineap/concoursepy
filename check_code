@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+CURDIR=$(pwd)
+SELFDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+
+cd $SELFDIR
+python3 -m pycodestyle concoursepy
+if [[ $1 = '-v' ]]; then
+    python3 -m pylint --rcfile=pylintrc --reports=yes concoursepy
+else
+    python3 -m pylint --rcfile=pylintrc concoursepy
+fi
+cd $CURDIR

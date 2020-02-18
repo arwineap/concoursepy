@@ -1,3 +1,3 @@
-name = "concoursepy"
+from concoursepy.api import Api as api
 
-from concoursepy.api import api
+name = "concoursepy"
