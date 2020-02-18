@@ -7,7 +7,7 @@ class api:
         self.url = url
         self.username = username
         self.password = password
-        self.ATC_AUTH = ""
+        self.session = None
         self.auth()
 
     def get_config(self, team_name, pipeline_name):
@@ -182,16 +182,19 @@ class api:
             if "invalid username and password" in r.text:
                 raise(ValueError("authentication failure"))
             if r.status_code == requests.codes.ok:
-                self.ATC_AUTH = session.cookies.get_dict()['skymarshal_auth'].split('"')[1].split()[1]
+                self.ATC_AUTH = session.cookies.get_dict()['skymarshal_auth0'].split('"')[1].split()[1]
+            self.session = session
         if self.ATC_AUTH:
             return True
         return False
 
     def get(self, url):
-        r = requests.get(url, headers={'Content-Type': 'application/json', 'Authorization': "Bearer %s" % self.ATC_AUTH})
+        # r = requests.get(url, headers={'Content-Type': 'application/json', 'Authorization': "Bearer %s" % self.ATC_AUTH})
+        r = self.session.get(url)
         if r.status_code == 401 or r.text == 'not authorized':
             self.auth()
-            r = requests.get(url, headers={'Content-Type': 'application/json', 'Authorization': "Bearer %s" % self.ATC_AUTH})
+            # r = requests.get(url, headers={'Content-Type': 'application/json', 'Authorization': "Bearer %s" % self.ATC_AUTH})
+            r = self.session.get(url)
         if r.status_code == requests.codes.ok:
             return json.loads(r.text)
         return False
