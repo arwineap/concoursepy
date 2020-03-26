@@ -41,7 +41,7 @@ class Api:
         return self.get("builds")
 
     def get_build(self, build_id):
-        return self.get("build/%s" % build_id)
+        return self.get("builds/%s" % build_id)
 
     def build(self, build_id):
         """Leaving this here for backwards compatibility."""
