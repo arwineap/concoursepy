@@ -7,6 +7,8 @@ from urllib.parse import urljoin
 import requests
 from requests.exceptions import HTTPError
 
+from sseclient import SSEClient
+
 
 LOGIN_REG = re.compile(r'"/sky/issuer/auth/local.*?"')
 
@@ -60,8 +62,19 @@ class Api:
     def read_output_from_build_plan(self, build_id, plan_id):
         return self.get("builds/%s/plan/%s/input" % (build_id, plan_id))
 
-    def build_events(self, build_id):
-        return self.get("builds/%s/events" % build_id)
+    def build_events(self, build_id, iterator=False):
+        """Return or yield build events
+
+        Since build events are returned as sse streams by concourse,
+        if the build is not finished, this may stall until the end.
+        You may wish instead to iterate over incoming results in a thread
+        by passing `iterator=True`, otherwise we wait till we receive the
+        end of all events (and this can take some time if the build is not
+        finished).
+        """
+        return self.get(
+            "builds/%s/events" % build_id, stream=True, iterator=iterator
+        )
 
     def build_resources(self, build_id):
         return self.get("builds/%s/resources" % build_id)
@@ -416,18 +429,57 @@ class Api:
 
     @staticmethod
     def _is_response_ok(response):
-        if response.status_code == 401 or response.text == 'not authorized':
-            return False
+        try:
+            response.raise_for_status()
+        except HTTPError as e:
+            if e.response.status_code == 401:
+                return False
+            else:
+                raise
         return True
 
-    def get(self, path):
+    @staticmethod
+    def _json_or_other(data):
+        if isinstance(data, str):
+            try:
+                return json.loads(data)
+            except json.JSONDecodeError:
+                pass
+        return data
+
+    @classmethod
+    def _event_to_dict(cls, event):
+        data = {}
+        for attr in ('id', 'event', 'data', 'retry'):
+            data[attr] = cls._json_or_other(getattr(event, attr))
+        return data
+
+    @classmethod
+    def iter_sse_stream(cls, resp):
+        client = SSEClient(resp)
+        for event in client.events():
+            data = cls._event_to_dict(event)
+            yield data
+            if event.event == 'end':
+                client.close()
+                break
+
+    def get(self, path, stream=False, iterator=False):
         url = self._make_api_url(path)
-        r = self.requests.get(url, headers=self.headers)
+        r = self.requests.get(url, headers=self.headers, stream=stream)
         if not self._is_response_ok(r) and self.has_username_and_passwd:
             self.auth()
-            r = self.requests.get(url, headers=self.headers)
+            r = self.requests.get(url, headers=self.headers, stream=stream)
         if r.status_code == requests.codes.ok:
-            return json.loads(r.text)
+            if stream:
+                if iterator:
+                    return self.iter_sse_stream(r)
+                else:
+                    return [
+                        data for data in self.iter_sse_stream(r)  # noqa pylint: disable=R1721
+                    ]
+            else:
+                return json.loads(r.text)
         else:
             r.raise_for_status()
         return False
