@@ -13,4 +13,9 @@ import concoursepy
 
 ci = concoursepy.api('https://ci.example.com', 'username', 'password')
 print(ci.jobs('example_pipeline'))
+
+# Or with token istead of username and password:
+ci = concoursepy.api('https://ci.example.com', token='SomeLongTokenString')
+print(ci.jobs('example_pipeline'))
+
 ```
