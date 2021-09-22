@@ -18,7 +18,7 @@ def read_requirements(filename):
 
 setuptools.setup(
     name="concoursepy",
-    version="0.0.20",
+    version="0.0.30",
     author="Alex Arwine",
     author_email="arwineap@gmail.com",
     description="library to interface with concourse",
