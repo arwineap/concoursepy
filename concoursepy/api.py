@@ -62,7 +62,10 @@ class Api:
     def read_output_from_build_plan(self, build_id, plan_id):
         return self.get("builds/%s/plan/%s/input" % (build_id, plan_id))
 
-    def build_events(self, build_id, iterator=False):
+    def build_events(
+            self, build_id,
+            iterator=False, yield_sse_elts=False, return_sse_client=False
+    ):
         """Return or yield build events
 
         Since build events are returned as sse streams by concourse,
@@ -71,9 +74,26 @@ class Api:
         by passing `iterator=True`, otherwise we wait till we receive the
         end of all events (and this can take some time if the build is not
         finished).
+        If you pass `yield_sse_elts` along with `iterator=True`, you will
+        receive a:
+        {
+            'data': <parsed data>,
+            event: <sseclient.Event>,
+            'client': <sseclient.SSEClient>
+        }
+        dict on each iteration.
+        This will allow you to call the `.close()` method on the client in
+        order to cleanly interrupt the stream if you want to interrupt it
+        before the end (i.e.: on a running build), or to read the raw event.
+        If you pass `return_sse_client=True` you only get the
+        sseclient.SSEClient instance and manage it yourself.
         """
         return self.get(
-            "builds/%s/events" % build_id, stream=True, iterator=iterator
+            "builds/%s/events" % build_id,
+            stream=True,
+            iterator=iterator,
+            yield_sse_elts=yield_sse_elts,
+            return_sse_client=return_sse_client
         )
 
     def build_resources(self, build_id):
@@ -455,16 +475,25 @@ class Api:
         return data
 
     @classmethod
-    def iter_sse_stream(cls, resp):
+    def iter_sse_stream(cls, resp, yield_sse_elts=False):
         client = SSEClient(resp)
         for event in client.events():
             data = cls._event_to_dict(event)
-            yield data
+            if yield_sse_elts:
+                yield {'data': data, 'event': event, 'client': client}
+            else:
+                yield data
             if event.event == 'end':
                 client.close()
                 break
 
-    def get(self, path, stream=False, iterator=False):
+    def get(
+            self, path,
+            stream=False,
+            iterator=False,
+            yield_sse_elts=False,
+            return_sse_client=False
+    ):
         url = self._make_api_url(path)
         r = self.requests.get(url, headers=self.headers, stream=stream)
         if not self._is_response_ok(r) and self.has_username_and_passwd:
@@ -472,8 +501,12 @@ class Api:
             r = self.requests.get(url, headers=self.headers, stream=stream)
         if r.status_code == requests.codes.ok:
             if stream:
-                if iterator:
-                    return self.iter_sse_stream(r)
+                if return_sse_client:
+                    return SSEClient(r)
+                elif iterator:
+                    return self.iter_sse_stream(
+                        r, yield_sse_elts=yield_sse_elts
+                    )
                 else:
                     return [
                         data for data in self.iter_sse_stream(r)  # noqa pylint: disable=R1721
