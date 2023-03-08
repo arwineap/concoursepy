@@ -1,4 +1,4 @@
-import collections
+from collections.abc import Mapping
 import json
 from os.path import join as pathjoin
 import re
@@ -27,40 +27,40 @@ class Api:
         return self.get('teams')
 
     def get_team(self, team_name):
-        return self.get('teams/%s' % team_name)
+        return self.get(f'teams/{team_name}')
 
     def get_config(self, team_name, pipeline_name):
         return self.get(
-            "teams/%s/pipelines/%s/config" % (team_name, pipeline_name)
+            f"teams/{team_name}/pipelines/{pipeline_name}/config"
         )
 
     def jobs(self, team_name, pipeline_name):
         return self.get(
-            "teams/%s/pipelines/%s/jobs" % (team_name, pipeline_name)
+            f"teams/{team_name}/pipelines/{pipeline_name}/jobs"
         )
 
     def list_builds(self):
         return self.get("builds")
 
     def get_build(self, build_id):
-        return self.get("builds/%s" % build_id)
+        return self.get(f"builds/{build_id}")
 
     def build(self, build_id):
         """Leaving this here for backwards compatibility."""
         return self.get_build(build_id)
 
     def get_build_plan(self, build_id):
-        return self.get("builds/%s/plan" % build_id)
+        return self.get(f"builds/{build_id}/plan")
 
     def build_plan(self, build_id):
         """Leaving this here for backwards compatibility."""
         return self.get_build_plan(build_id)
 
     def send_input_to_build_plan(self, build_id, plan_id):
-        return self.put("builds/%s/plan/%s/input" % (build_id, plan_id))
+        return self.put(f"builds/{build_id}/plan/{plan_id}/input")
 
     def read_output_from_build_plan(self, build_id, plan_id):
-        return self.get("builds/%s/plan/%s/input" % (build_id, plan_id))
+        return self.get(f"builds/{build_id}/plan/{plan_id}/input")
 
     def build_events(
             self, build_id,
@@ -89,7 +89,7 @@ class Api:
         sseclient.SSEClient instance and manage it yourself.
         """
         return self.get(
-            "builds/%s/events" % build_id,
+            f"builds/{build_id}/events",
             stream=True,
             iterator=iterator,
             yield_sse_elts=yield_sse_elts,
@@ -97,41 +97,35 @@ class Api:
         )
 
     def build_resources(self, build_id):
-        return self.get("builds/%s/resources" % build_id)
+        return self.get(f"builds/{build_id}/resources")
 
     def abort_build(self, build_id):
-        return self.put("builds/%s/abort" % build_id)
+        return self.put(f"builds/{build_id}/abort")
 
     def get_build_preparation(self, build_id):
-        return self.get("builds/%s/preparation" % build_id)
+        return self.get(f"builds/{build_id}/preparation")
 
     def list_all_jobs(self):
         return self.get("jobs")
 
     def list_jobs(self, team_name, pipeline_name):
         return self.get(
-            "teams/%s/pipelines/%s/jobs" % (team_name, pipeline_name)
+            f"teams/{team_name}/pipelines/{pipeline_name}/jobs"
         )
 
     def get_job(self, team_name, pipeline_name, job_name):
         return self.get(
-            "teams/%s/pipelines/%s/jobs/%s" % (
-                team_name, pipeline_name, job_name
-            )
+            f"teams/{team_name}/pipelines/{pipeline_name}/jobs/{job_name}"
         )
 
     def list_job_builds(self, team_name, pipeline_name, job_name):
         return self.get(
-            "teams/%s/pipelines/%s/jobs/%s/builds" % (
-                team_name, pipeline_name, job_name
-            )
+            f"teams/{team_name}/pipelines/{pipeline_name}/jobs/{job_name}/builds"  # noqa
         )
 
     def create_job_build(self, team_name, pipeline_name, job_name):
         return self.post(
-            "teams/%s/pipelines/%s/jobs/%s/builds" % (
-                team_name, pipeline_name, job_name
-            )
+            f"teams/{team_name}/pipelines/{pipeline_name}/jobs/{job_name}/builds"  # noqa
         )
 
     def trigger(self, team_name, pipeline_name, job_name):
@@ -140,71 +134,61 @@ class Api:
 
     def list_job_inputs(self, team_name, pipeline_name, job_name):
         return self.get(
-            "teams/%s/pipelines/%s/jobs/%s/inputs" % (
-                team_name, pipeline_name, job_name
-            )
+            f"teams/{team_name}/pipelines/{pipeline_name}/jobs/{job_name}/inputs"  # noqa
         )
 
     def get_job_build(self, team_name, pipeline_name, job_name, build_name):
         return self.get(
-            "teams/%s/pipelines/%s/jobs/%s/builds/%s" % (
-                team_name, pipeline_name, job_name, build_name
-            )
+            f"teams/{team_name}/pipelines/{pipeline_name}/jobs/{job_name}/builds/{build_name}"  # noqa
         )
 
     def pause_job(self, team_name, pipeline_name, job_name):
         return self.put(
-            "teams/%s/pipelines/%s/jobs/%s/pause" % (
-                team_name, pipeline_name, job_name
-            )
+            f"teams/{team_name}/pipelines/{pipeline_name}/jobs/{job_name}/pause"  # noqa
         )
 
     def unpause_job(self, team_name, pipeline_name, job_name):
         return self.put(
-            "teams/%s/pipelines/%s/jobs/%s/unpause" % (
-                team_name, pipeline_name, job_name
-            )
+            f"teams/{team_name}/pipelines/{pipeline_name}/jobs/{job_name}/unpause"  # noqa
         )
 
     def job_badge(self, team_name, pipeline_name, job_name):
         return self.get(
-            "teams/%s/pipelines/%s/jobs/%s/badge" % (
-                team_name, pipeline_name, job_name
-            )
+            f"teams/{team_name}/pipelines/{pipeline_name}/jobs/{job_name}/badge"  # noqa
         )
 
     def main_job_badge(self, pipeline_name, job_name):
         return self.get(
-            "pipelines/%s/jobs/%s/badge" % (pipeline_name, job_name)
+            f"pipelines/{pipeline_name}/jobs/{job_name}/badge"  # noqa
         )
 
     def list_all_pipelines(self):
         return self.get("pipelines")
 
     def list_pipelines(self, team_name):
-        return self.get("teams/%s/pipelines" % team_name)
+        return self.get(f"teams/{team_name}/pipelines")
 
     def get_pipeline(self, team_name, pipeline_name):
-        return self.get("teams/%s/pipelines/%s" % (team_name, pipeline_name))
+        return self.get(f"teams/{team_name}/pipelines/{pipeline_name}")
 
     def pause_pipeline(self, team_name, pipeline_name):
         return self.put(
-            "teams/%s/pipelines/%s/pause" % (team_name, pipeline_name)
+            f"teams/{team_name}/pipelines/{pipeline_name}/pause"
         )
 
     def unpause_pipeline(self, team_name, pipeline_name):
         return self.put(
-            "teams/%s/pipelines/%s/unpause" % (team_name, pipeline_name)
+            f"teams/{team_name}/pipelines/{pipeline_name}/unpause"
         )
 
     def list_pipeline_builds(self, team_name, pipeline_name):
         return self.get(
-            "teams/%s/pipelines/%s/builds" % (team_name, pipeline_name)
+            f"teams/{team_name}/pipelines/{pipeline_name}/builds"
         )
 
     def pipeline_badge(self, team_name, pipeline_name):
         return self.get(
-            "teams/%s/pipelines/%s/badge" % (team_name, pipeline_name)
+            f"teams/{team_name}/pipelines/{pipeline_name}/badge"
         )
 
     def list_all_resources(self):
@@ -212,28 +196,24 @@ class Api:
 
     def list_resources(self, team_name, pipeline_name):
         return self.get(
-            "teams/%s/pipelines/%s/resources" % (team_name, pipeline_name)
+            f"teams/{team_name}/pipelines/{pipeline_name}/resources"
         )
 
     def list_resource_types(self, team_name, pipeline_name):
         return self.get(
-            "teams/%s/pipelines/%s/resource-types" % (team_name, pipeline_name)
+            f"teams/{team_name}/pipelines/{pipeline_name}/resource-types"
         )
 
     def get_resource(self, team_name, pipeline_name, resource_name):
         return self.get(
-            "teams/%s/pipelines/%s/resources/%s" % (
-                team_name, pipeline_name, resource_name
-            )
+            f"teams/{team_name}/pipelines/{pipeline_name}/resources/{resource_name}"  # noqa
         )
 
     def list_resource_versions(
         self, team_name, pipeline_name, resource_name, limit=100
     ):
         return self.get(
-            "teams/%s/pipelines/%s/resources/%s/versions?limit=%s" % (
-                team_name, pipeline_name, resource_name, limit
-            )
+            f"teams/{team_name}/pipelines/{pipeline_name}/resources/{resource_name}/versions?limit={limit}"  # noqa
         )
 
     def versions(self, team_name, pipeline_name, resource_name, limit=100):
@@ -246,18 +226,14 @@ class Api:
         self, team_name, pipeline_name, resource_name, resource_version_id
     ):
         return self.get(
-            "teams/%s/pipelines/%s/resources/%s/versions/%s" % (
-                team_name, pipeline_name, resource_name, resource_version_id
-            )
+            f"teams/{team_name}/pipelines/{pipeline_name}/resources/{resource_name}/versions/{resource_version_id}"  # noqa
         )
 
     def enable_resource_version(
         self, team_name, pipeline_name, resource_name, resource_version_id
     ):
         return self.put(
-            "teams/%s/pipelines/%s/resources/%s/versions/%s/enable" % (
-                team_name, pipeline_name, resource_name, resource_version_id
-            )
+            f"teams/{team_name}/pipelines/{pipeline_name}/resources/{resource_name}/versions/{resource_version_id}/enable"  # noqa
         )
 
     def enable(
@@ -271,9 +247,7 @@ class Api:
         self, team_name, pipeline_name, resource_name, resource_version_id
     ):
         return self.put(
-            "teams/%s/pipelines/%s/resources/%s/versions/%s/disable" % (
-                team_name, pipeline_name, resource_name, resource_version_id
-            )
+            f"teams/{team_name}/pipelines/{pipeline_name}/resources/{resource_name}/versions/{resource_version_id}/disable"  # noqa
         )
 
     def disable(
@@ -288,10 +262,7 @@ class Api:
         resource_config_version_id
     ):
         return self.put(
-            "teams/%s/pipelines/%s/resources/%s/versions/%s/pin" % (
-                team_name, pipeline_name, resource_name,
-                resource_config_version_id
-            )
+            f"teams/{team_name}/pipelines/{pipeline_name}/resources/{resource_name}/versions/{resource_config_version_id}/pin"  # noqa
         )
 
     def unpin_resource_version(
@@ -299,19 +270,14 @@ class Api:
         resource_config_version_id
     ):
         return self.put(
-            "teams/%s/pipelines/%s/resources/%s/versions/%s/unpin" % (
-                team_name, pipeline_name, resource_name,
-                resource_config_version_id
-            )
+            f"teams/{team_name}/pipelines/{pipeline_name}/resources/{resource_name}/versions/{resource_config_version_id}/unpin"  # noqa
         )
 
     def list_builds_with_version_as_input(
         self, team_name, pipeline_name, resource_name, resource_id
     ):
         return self.get(
-            "teams/%s/pipelines/%s/resources/%s/versions/%s/input_to" % (
-                team_name, pipeline_name, resource_name, resource_id
-            )
+            f"teams/{team_name}/pipelines/{pipeline_name}/resources/{resource_name}/versions/{resource_id}/input_to"  # noqa
         )
 
     def input_to(self, team_name, pipeline_name, resource_name, resource_id):
@@ -324,9 +290,7 @@ class Api:
         self, team_name, pipeline_name, resource_name, resource_id
     ):
         return self.get(
-            "teams/%s/pipelines/%s/resources/%s/versions/%s/output_to" % (
-                team_name, pipeline_name, resource_name, resource_id
-            )
+            f"teams/{team_name}/pipelines/{pipeline_name}/resources/{resource_name}/versions/{resource_id}/output_to"  # noqa
         )
 
     def output_of(self, team_name, pipeline_name, resource_name, resource_id):
@@ -339,23 +303,17 @@ class Api:
         self, team_name, pipeline_name, resource_name, resource_version_id
     ):
         return self.get(
-            "teams/%s/pipelines/%s/resources/%s/versions/%s/causality" % (
-                team_name, pipeline_name, resource_name, resource_version_id
-            )
+            f"teams/{team_name}/pipelines/{pipeline_name}/resources/{resource_name}/versions/{resource_version_id}/causality"  # noqa
         )
 
     def pause_resource(self, team_name, pipeline_name, resource_name):
         return self.put(
-            "teams/%s/pipelines/%s/resources/%s/pause" % (
-                team_name, pipeline_name, resource_name
-            )
+            f"teams/{team_name}/pipelines/{pipeline_name}/resources/{resource_name}/pause"  # noqa
         )
 
     def unpause_resource(self, team_name, pipeline_name, resource_name):
         return self.put(
-            "teams/%s/pipelines/%s/resources/%s/unpause" % (
-                team_name, pipeline_name, resource_name
-            )
+            f"teams/{team_name}/pipelines/{pipeline_name}/resources/{resource_name}/unpause"  # noqa
         )
 
     def _close_session(self):
@@ -380,11 +338,11 @@ class Api:
     def _make_api_url(self, path):
         """Return the api's full  url.
 
-        If `path` does not have a leading slash self.api_path is prepended and
-        we return something like '%s/%s/%s' % (self.url, self.api_path, path)
+        If `path` does not have a leading slash self.api_path is prepended, and
+        we return something like f'{self.url}/{self.api_path}/{path}'
 
-        If `path` has a leading slash self.api_path is not prepended and
-        we return something like '%s/%s/%s' % (self.url, path)
+        If `path` has a leading slash self.api_path is not prepended, and
+        we return something like f'{self.url}/{self.api_path}
         """
         return urljoin(self.url, pathjoin(self.api_path, path))
 
@@ -429,7 +387,7 @@ class Api:
     def headers(self):
         if (
             hasattr(self.session, 'headers')
-            and isinstance(self.session.headers, collections.Mapping)
+            and isinstance(self.session.headers, Mapping)
             and hasattr(self.session.headers, 'copy')
         ):
             headers = self.session.headers.copy()
@@ -438,7 +396,7 @@ class Api:
 
         headers['Content-Type'] = 'application/json'
         if self.ATC_AUTH is not None and 'Authorization' not in headers:
-            headers['Authorization'] = "Bearer %s" % self.ATC_AUTH
+            headers['Authorization'] = f"Bearer {self.ATC_AUTH}"
         return headers
 
     @property
@@ -508,9 +466,7 @@ class Api:
                         r, yield_sse_elts=yield_sse_elts
                     )
                 else:
-                    return [
-                        data for data in self.iter_sse_stream(r)  # noqa pylint: disable=R1721
-                    ]
+                    return list(self.iter_sse_stream(r))
             else:
                 return json.loads(r.text)
         else:
