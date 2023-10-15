@@ -290,7 +290,7 @@ class Api:
         self, team_name, pipeline_name, resource_name, resource_id
     ):
         return self.get(
-            f"teams/{team_name}/pipelines/{pipeline_name}/resources/{resource_name}/versions/{resource_id}/output_to"  # noqa
+            f"teams/{team_name}/pipelines/{pipeline_name}/resources/{resource_name}/versions/{resource_id}/output_of"  # noqa
         )
 
     def output_of(self, team_name, pipeline_name, resource_name, resource_id):
@@ -346,10 +346,6 @@ class Api:
         """
         return urljoin(self.url, pathjoin(self.api_path, path))
 
-    @staticmethod
-    def _get_login_post_path(html_txt):
-        return LOGIN_REG.search(html_txt).group().strip('"')
-
     @property
     def has_username_and_passwd(self):
         return self.username is not None and self.password is not None
@@ -360,7 +356,7 @@ class Api:
             session = self._set_new_session()
             r = session.get(urljoin(self.url, "/sky/login"))
             if r.status_code == 200:
-                post_path = self._get_login_post_path(r.text)
+                post_path = r.request.path_url
                 r = session.post(
                     urljoin(self.url, post_path),
                     data={'login': self.username, 'password': self.password}
