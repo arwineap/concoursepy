@@ -290,7 +290,7 @@ class Api:
         self, team_name, pipeline_name, resource_name, resource_id
     ):
         return self.get(
-            f"teams/{team_name}/pipelines/{pipeline_name}/resources/{resource_name}/versions/{resource_id}/output_to"  # noqa
+            f"teams/{team_name}/pipelines/{pipeline_name}/resources/{resource_name}/versions/{resource_id}/output_of"  # noqa
         )
 
     def output_of(self, team_name, pipeline_name, resource_name, resource_id):
